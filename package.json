@@ -1,0 +1,27 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.7",
+    "axios": "^1.1.2",
+    "postcss": "^8.4.14",
+    "pusher-js": "^8.0.1",
+    "vite-plugin-live-reload": "^3.0.2",
+    "vue": "^3.3.4",
+    "vue3-sfc-loader": "^0.8.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.2",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.4.5",
+    "vite-plugin-full-reload": "^1.0.5"
+  }
+}

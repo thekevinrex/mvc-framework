@@ -1,18 +1,21 @@
 {
-    "name": "thekevinrex/mvc-framework",
-    "type": "project",
-    "require": {
-        "vlucas/phpdotenv": "^5.5"
-    },
-    "authors": [
-        {
-            "name": "thekevinrex",
-            "email": "39094357+thekevinrex@users.noreply.github.com"
-        }
-    ],
-    "autoload" : {
-        "psr-4" : {
-            "app\\" :"./"
-        }
-    }
+	"name": "thekevinrex/mvc-framework",
+	"type": "project",
+	"require": {},
+	"authors": [
+		{
+			"name": "thekevinrex",
+			"email": "39094357+thekevinrex@users.noreply.github.com"
+		}
+	],
+	"autoload": {
+		"files": [
+			"./PhpVueBridge/Bedrock/Helpers/functions.php"
+		],
+		"psr-4": {
+			"PhpVueBridge\\": "./PhpVueBridge/",
+			"App\\": "./App/",
+			"Database\\": "./Database/"
+		}
+	}
 }

@@ -1,0 +1,34 @@
+@extend ('layaut')
+
+@section ('content')
+<div class="container p">
+
+    <div class="col w-1/4">
+        make operations (sell, bay, change)
+
+        @include('hola')
+    </div>
+
+    <div class="col w-full border border-gray px items-center">
+        display all operations
+
+        @section ('component')
+        <component-containers vue:msg="hola jijo puta" num="44"></component-containers>
+        @endsection
+
+        <component-prueba>
+            probando prueba component
+            <hr>
+            <a href="{{ route('home') }}">{{ url()->current() }}</a>
+
+            <slot-name>probando normal slot</slot-name>
+        </component-prueba>
+
+    </div>
+
+    <div class="col w-1/4">
+        show current money in all the containers
+    </div>
+
+</div>
+@endsection

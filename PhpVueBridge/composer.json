@@ -1,0 +1,22 @@
+{
+	"name": "thekevinrex/mvc-framework/Core",
+	"type": "package",
+	"require": {
+		"vlucas/phpdotenv": "^5.5",
+		"ext-json": "*"
+	},
+	"authors": [
+		{
+			"name": "thekevinrex",
+			"email": "39094357+thekevinrex@users.noreply.github.com"
+		}
+	],
+	"autoload": {
+		"files": [
+			"./utils/functions.php"
+		],
+		"psr-4": {
+			"PhpVueBridge\\": "./"
+		}
+	}
+}
