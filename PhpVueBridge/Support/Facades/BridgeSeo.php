@@ -1,7 +1,7 @@
 <?php
 
 
-namespace PhpVueBridge\Support\facades;
+namespace PhpVueBridge\Support\Facades;
 
 
 class BridgeSeo extends Facade

@@ -1,8 +1,6 @@
 <?php
 
-namespace app\core\view\Compilers\Managers;
-
-use app\Core\Support\Util;
+namespace PhpVueBridge\View\Compilers\Managers;
 
 trait compileEchos
 {

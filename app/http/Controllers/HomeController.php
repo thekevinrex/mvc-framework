@@ -1,15 +1,16 @@
 <?php
 
-namespace app\App\Http\Controllers;
+namespace App\Http\Controllers;
 
-use app\Core\Request\Request;
+use App\Http\Controllers\Controller;
+use PhpVueBridge\Http\Request\Request;
 
 class HomeController extends Controller
 {
 
     public function index(Request $request)
     {
-        return view('index', ['hola' => '12312312312']);
+        return view('hola', ['hola' => '12312312312']);
     }
 
     public function home()
@@ -17,6 +18,3 @@ class HomeController extends Controller
         return 'asdasdas';
     }
 }
-
-
-?>

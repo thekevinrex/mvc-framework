@@ -7,20 +7,18 @@ use PhpVueBridge\Console\Proccess\PhpExecutableFinder;
 use PhpVueBridge\Console\Proccess\Proccess;
 
 
-class ServeCommand extends Command
-{
+class ServeCommand extends Command {
 
     protected int $port = 8000;
 
     protected int $offsetPort = 0;
 
-    public function excecute()
-    {
+    public function excecute() {
         // This start the process and returned the result for check if the process is still running
         $process = $this->startProcess();
 
         // To provide a funcionality similar to the host refresh that vite provides
-        while ($process->isRunning()) {
+        while($process->isRunning()) {
 
             // TODO: Implement hot refresh for the environment and views
 
@@ -29,12 +27,11 @@ class ServeCommand extends Command
 
     }
 
-    protected function startProcess(): Proccess
-    {
+    protected function startProcess(): Proccess {
         // Create a new instance of the process for the given command
         $process = new Proccess(
             $this->serveCommand(),
-            $this->app->getBasePath() . '/public',
+            $this->app->getBasePath().'/public',
             $_ENV
         );
 
@@ -46,35 +43,31 @@ class ServeCommand extends Command
         return $process;
     }
 
-    protected function serveCommand(): string
-    {
+    protected function serveCommand(): string {
         return implode(' ', [
             (new PhpExecutableFinder())->find(), // Find the php excecutable becouse the proc_open cant get access to php
             '-S', // Command to execute the local development server
-            $this->host() . ':' . $this->port(), // The host and the port of the server
+            $this->host().':'.$this->port(), // The host and the port of the server
             '../server.php', // A fallback excecutable file
         ]);
     }
 
-    public function host(): string
-    {
-        return '127.0.0.1';
+    public function host(): string {
+        return 'localhost';
     }
 
-    public function port(): int
-    {
+    public function port(): int {
         return $this->port + $this->offsetPort;
     }
 
-    protected function handleOutput($type, $data)
-    {
-        if (!is_string($data) || empty($data)) {
+    protected function handleOutput($type, $data) {
+        if(!is_string($data) || empty($data)) {
             return;
         }
 
         // If the process output returns a string that contains the required string then we info that the server started
-        if (str_contains($data, 'Development Server (http') && str_contains($data, 'started')) {
-            $this->info('Server started on [http://' . $this->host() . ':' . $this->port() . ']');
+        if(str_contains($data, 'Development Server (http') && str_contains($data, 'started')) {
+            $this->info('Server started on [http://'.$this->host().':'.$this->port().']');
 
             $this->writeLine('Press Ctrl+C to stop', 'fg=red');
 

@@ -11,12 +11,6 @@ class LoadConfigFiles
 
     protected Application $app;
 
-    /**
-     * The config folder path
-     * @var string
-     */
-    protected string $configPath = '';
-
     public function __construct(Application $app)
     {
         $this->app = $app;
@@ -40,7 +34,9 @@ class LoadConfigFiles
     protected function loadConfigFromFiles()
     {
 
-        $realPath = realpath($this->configPath);
+        $realPath = realpath(
+            $configPath = $this->app->getConfigPath()
+        );
 
         $dir = scandir($realPath);
         $items = [];
@@ -51,7 +47,7 @@ class LoadConfigFiles
                 $pos = strpos($name, '.');
                 $key = substr($name, 0, $pos);
 
-                $items[$key] = require $this->configPath . '/' . $name;
+                $items[$key] = require $configPath . '/' . $name;
             }
         }
 

@@ -1,8 +1,9 @@
 <?php
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
-use app\core\bridge\Components\BridgeComponentInterface;
+use PhpVueBridge\Bridge\Components\BridgeComponentInterface;
+
 
 class BridgeEvent
 {

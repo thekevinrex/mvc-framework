@@ -1,114 +1,55 @@
 <?php
 
 
-namespace app\core\view\Engines;
+namespace PhpVueBridge\View\Engines;
 
-
-use app\Core\Application;
-use app\core\contracts\ViewContract;
-use app\core\view\Compilers\CompilerFactory;
-use app\core\view\Component;
+use PhpVueBridge\View\Managers\ViewManager;
+use PhpVueBridge\View\Compilers\CompilerFactory;
 
 class CompilerEngine extends PhPEngine
 {
 
-    protected CompilerFactory $compiler;
-
-    protected Application $app;
+    protected array $compiling = [];
 
     protected array $compiledFiles = [];
 
-    protected ViewEngine $viewEngine;
-
-    public function __construct(CompilerFactory $compiler, Application $app)
-    {
-        $this->compiler = $compiler;
-        $this->app = $app;
+    public function __construct(
+        protected CompilerFactory $compiler
+    ) {
     }
 
-
-    public function get(string $path, array $data = [], $isComponent = false)
+    public function get(string $path, array $data = []): string
     {
-        if (!isset($data['_engine'])) {
-            $data['_engine'] = $this->getEngine($path, $isComponent);
+        $this->compiling[] = $path;
+
+        if (!$this->verifyIsCompiled($path)) {
+            $this->compiler->compile($path);
         }
 
-        return parent::get(
-            $this->compiler->getCompiledPath($path),
-            $data
-        );
+        try {
+            $content = $this->getFileContent($this->compiler->getCompiledPath($path), $data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        $this->compiledFiles[$path] = true;
+
+        array_pop($this->compiling);
+
+        return $content;
     }
 
-    protected function verifyIsCompiled($path, $data = [], $isComponent = false)
+    protected function verifyIsCompiled($path)
     {
-
         if (!isset($this->compiledFiles[$path]) && $this->compiler->shouldCompile($path)) {
-            $this->compiler->compile($path, $data, $isComponent);
-        }
-
-        return $this->compiledFiles[$path] = true;
-    }
-
-    public function render($path, array $data = [])
-    {
-        if ($path instanceof Component) {
-            return $this->renderComponent($path, $data);
-        }
-
-        if ($path instanceof ViewContract) {
-            return $this->renderView($path, $data);
-        }
-
-        if (!$this->verifyIsCompiled($path, $data)) {
             return false;
         }
 
+        return true;
+    }
+
+    public function render($path, array $data = []): string
+    {
         return $this->get($path, $data);
-    }
-
-    public function renderComponent($component, array $data = [])
-    {
-        return $this->renderView($component->render(), $data, true);
-    }
-
-    public function renderView($view, array $data = [], $isComponent = false)
-    {
-
-        if (!$this->verifyIsCompiled($view->getView(), $data, $isComponent)) {
-            return false;
-        }
-
-        $engine = $this->getEngine($view->getView(), $isComponent);
-
-        return [
-            $this->get($view->getView(), array_merge($data, ['_engine' => $engine]), $isComponent),
-            $engine,
-        ];
-    }
-
-    public function getEngine($path, $isComponent = false)
-    {
-
-        $path = $this->compiler->viewPath($path);
-
-        if ($isComponent && str_ends_with($path, '.vue.phtml')) {
-            return $this->getDefaultVueEngine();
-        }
-
-        if (ob_get_level() == 1) {
-            return $this->viewEngine = $this->getDefaultEngine();
-        }
-
-        return $this->viewEngine;
-    }
-
-    public function getDefaultVueEngine(): VueEngine
-    {
-        return new VueEngine($this);
-    }
-
-    public function getDefaultEngine(): ViewEngine
-    {
-        return new ViewEngine($this);
     }
 }

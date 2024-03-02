@@ -31,10 +31,6 @@ $response = $app->resolve(\PhpVueBridge\Http\Contracts\HttpContract::class)->han
 
 $response->send();
 
-// trigger_error("SDas");
-// $s = log(-4, -3);
-// spl_autoload_register('sdada');
-
 $app->close();
 
 ?>

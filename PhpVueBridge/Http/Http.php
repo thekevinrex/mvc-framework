@@ -48,7 +48,6 @@ class Http implements HttpContract
         try {
 
             $response = $this->sendRequestToRouter($request);
-
         } catch (\Throwable $e) {
             $response = $this->app->resolve(
                 \PhpVueBridge\Bedrock\Contracts\HandlerContract::class
@@ -68,25 +67,24 @@ class Http implements HttpContract
         $this->app->bootstrap(
             array_merge([
                 \PhpVueBridge\Bedrock\Bootstrapers\LoadEnvironmentVariables::class,
+                \PhpVueBridge\Bedrock\Bootstrapers\RegisterFacades::class,
                 \PhpVueBridge\Bedrock\Bootstrapers\LoadConfigFiles::class,
                 \PhpVueBridge\Bedrock\Bootstrapers\HandleExceptions::class,
-                \PhpVueBridge\Bedrock\Bootstrapers\RegisterFacades::class,
                 \PhpVueBridge\Bedrock\Bootstrapers\RegisterProviders::class,
             ], $this->bootstrapers)
         );
 
-        return
-            (new \PhpVueBridge\Routes\Middlewares\CheckLine($this->app))
-                ->throw($this->middlewares)
-                ->check($request)
-                ->then(function ($request) {
+        return (new \PhpVueBridge\Routes\Middlewares\CheckLine($this->app))
+            ->throw($this->middlewares)
+            ->check($request)
+            ->then(function ($request) {
 
-                    $this->app->instance('request', $request);
+                $this->app->instance('request', $request);
 
-                    return $this->router->resolve(
-                        $request
-                    );
-                });
+                return $this->router->resolve(
+                    $request
+                );
+            });
     }
 
     public function terminate()
@@ -100,4 +98,3 @@ class Http implements HttpContract
         $this->router->setGroupMiddleware($this->groupMiddlewares);
     }
 }
-?>

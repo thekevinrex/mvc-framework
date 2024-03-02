@@ -44,19 +44,17 @@ class Handler implements ConsoleContract
         // Bootstrap the app with the given bootstrapper
         $this->app->bootstrap([
             \PhpVueBridge\Bedrock\Bootstrapers\LoadEnvironmentVariables::class,
-            // \PhpVueBridge\Bedrock\Bootstrapers\LoadConfigFiles::class,
-            // \PhpVueBridge\Bedrock\Bootstrapers\HandleExceptions::class,
-            // \PhpVueBridge\Bedrock\Bootstrapers\RegisterFacades::class,
-            // \PhpVueBridge\Bedrock\Bootstrapers\RegisterProviders::class,
+            \PhpVueBridge\Bedrock\Bootstrapers\RegisterFacades::class,
+            \PhpVueBridge\Bedrock\Bootstrapers\LoadConfigFiles::class,
+            \PhpVueBridge\Bedrock\Bootstrapers\HandleExceptions::class,
+            \PhpVueBridge\Bedrock\Bootstrapers\RegisterProviders::class,
         ]);
 
         $command = $this->app->resolve($this->aviableCommands[$commandName]);
 
         if (!empty($firstCommand['arg'])) {
-
         } else {
             $command->excecute();
         }
     }
 }
-?>

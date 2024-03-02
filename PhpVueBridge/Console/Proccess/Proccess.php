@@ -3,7 +3,6 @@
 
 namespace PhpVueBridge\Console\Proccess;
 
-use PhpVueBridge\Bedrock\Application;
 use PhpVueBridge\Console\Proccess\Pipes\AbstractPipes;
 use PhpVueBridge\Console\Proccess\Pipes\WindowsPipes;
 
@@ -72,12 +71,15 @@ class Proccess
         // If is present the callback it we be build for its use on the process output
         $this->callback = $this->buildCallback($callback);
 
+        // We wet the current for where the process is going to run
         $path = $this->getPath();
 
+        // if the path is not a directory then we throw an exception
         if (!is_dir($path)) {
             throw new \RuntimeException('You must specify a directory');
         }
 
+        // Open the process for the given descriptor, path, and command 
         $this->process = @proc_open(
             $this->prepareCommand(),
             $descriptor,
@@ -87,6 +89,7 @@ class Proccess
             $options
         );
 
+        // If the process not started or failed to start then we throw an exception
         if (!is_resource($this->process)) {
             throw new \RuntimeException('You must specify a process');
         }
@@ -174,7 +177,8 @@ class Proccess
             proc_close($this->process);
         }
 
-        $exitCode = $this->status['exitcode'];
+        // if in the last update status there is present the exit code then returnint, if not then return -1
+        $exitCode = $this->status['exitcode'] ?? -1;
 
         $this->callback = null;
 

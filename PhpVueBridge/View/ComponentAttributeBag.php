@@ -1,10 +1,10 @@
 <?php
 
 
-namespace app\core\view;
+namespace PhpVueBridge\View;
 
+use PhpVueBridge\Collection\Collection;
 
-use app\Core\Collection\Collection;
 
 class ComponentAttributeBag extends Collection implements \Stringable
 {

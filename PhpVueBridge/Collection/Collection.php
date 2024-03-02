@@ -108,6 +108,11 @@ class Collection implements \ArrayAccess, CollectionInterface
     {
         $this->set($key, null);
     }
+
+    public function toArray()
+    {
+        return $this->items;
+    }
 }
 
 ?>

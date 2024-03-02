@@ -1,5 +1,13 @@
 {
-    "providers": [],
-    "load": [],
+    "providers": [
+        "PhpVueBridge\\View\\ViewServiceProvider",
+        "PhpVueBridge\\Bridge\\BridgeServiceProvider",
+        "App\\Providers\\RouteServiceProvider"
+    ],
+    "load": [
+        "PhpVueBridge\\View\\ViewServiceProvider",
+        "PhpVueBridge\\Bridge\\BridgeServiceProvider",
+        "App\\Providers\\RouteServiceProvider"
+    ],
     "deferred": []
 }

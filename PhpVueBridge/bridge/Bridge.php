@@ -1,18 +1,15 @@
 <?php
 
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
+use PhpVueBridge\Bridge\Utils\Vite;
+use PhpVueBridge\Bedrock\Application;
+use PhpVueBridge\Bridge\Utils\AssetLoader;
+use PhpVueBridge\Bridge\Contracts\BridgeContract;
+use PhpVueBridge\View\Compilers\Managers\compileEchos;
 
-use app\Core\Application;
-use app\core\bridge\BridgeHandler;
-use app\core\bridge\Utils\AssetLoader;
-use app\core\bridge\Utils\Vite;
-use app\core\contracts\BridgeContract;
-use app\core\facades\App;
-
-class Bridge implements BridgeContract
-{
+class Bridge implements BridgeContract {
 
     public const BRIDGE_HEADER = 'X_BRIDGE';
 
@@ -32,29 +29,26 @@ class Bridge implements BridgeContract
         protected Application $app
     ) {
         $this->server = new Vite(
-            $this->app->getBasePath() . '/bootstrap/Cache/server.json'
+            $this->app->getBasePath().'/bootstrap/Cache/server.json'
         );
 
         $this->assets = new AssetLoader($this->server);
     }
 
-    public function loadAssets(array $inputs)
-    {
+    public function loadAssets(array $inputs) {
         return $this->assets?->loadAssets($inputs);
     }
 
-    public function asset($asset)
-    {
+    public function asset($asset) {
         return $this->assets?->loadFile($asset);
     }
 
-    public function handler()
-    {
+    public function handler() {
         return $this->handler ??= new BridgeHandler();
     }
 
-    public function registerVueComponent($componentData, $view): void
-    {
+    public function registerVueComponent($componentData, $view): void {
+
 
         [$content, $engine] = $view;
 
@@ -77,40 +71,41 @@ class Bridge implements BridgeContract
 
         $exportData = true;
 
-        foreach ($engine->getVueScripts() as $script) {
+        foreach($engine->getVueScripts() as $script) {
             [$type, $scriptContent] = $script;
 
 
-            if (str_contains($type, 'setup')) {
-                $scriptContent = preg_replace_callback('/@bridgeData/x', function ($matches) use ($vueData, &$exportData) {
+            if(str_contains($type, 'setup')) {
 
-                    $refs = array();
+                //     $scriptContent = preg_replace_callback('/@bridgeData/x', function ($matches) use ($vueData, &$exportData) {
 
-                    foreach ($vueData['data'] as $key => $value) {
-                        $refs[] = "const {$key} = ref({$value})";
-                    }
+                //         $refs = array();
 
-                    $exportData = false;
+                //         foreach($vueData['data'] as $key => $value) {
+                //             $refs[] = "const {$key} = ref({$value})";
+                //         }
 
-                    return implode(PHP_EOL, $refs);
+                //         $exportData = false;
 
-                }, $scriptContent);
+                //         return implode(PHP_EOL, $refs);
 
-                if (count(array_keys($vueData['data'])) > 0) {
-                    $scriptContent = 'import { ref } from "vue";' . PHP_EOL . $scriptContent;
-                }
+                //     }, $scriptContent);
 
-                $scriptContent = preg_replace_callback('/@bridgeProps/x', function ($matches) use ($componentData) {
+                //     if(count(array_keys($vueData['data'])) > 0) {
+                //         $scriptContent = PHP_EOL.'import { ref } from "vue";'.PHP_EOL.$scriptContent;
+                //     }
 
-                    $props = array();
+                //     $scriptContent = preg_replace_callback('/@bridgeProps/x', function ($matches) use ($componentData) {
 
-                    foreach ($componentData['attributes']->toVuePropsWithValue() as $key => $value) {
-                        $refs[] = "const {$key} = '{$value}'";
-                    }
+                //         $props = array();
 
-                    return implode(PHP_EOL, $refs);
+                //         foreach($componentData['attributes']->toVuePropsWithValue() as $key => $value) {
+                //             $refs[] = "const {$key} = '{$value}'";
+                //         }
 
-                }, $scriptContent);
+                //         return implode(PHP_EOL, $refs);
+
+                //     }, $scriptContent);
 
             }
 
@@ -120,25 +115,22 @@ class Bridge implements BridgeContract
         $stringData = json_encode($vueData['data']);
         $stringProps = json_encode($vueData['props']);
 
-        $vueData['template'] .= implode(PHP_EOL, [
-            "<script>export default {",
-            "props : {$stringProps},",
-            ($exportData ? "data: () => { return {$stringData} }" : ''),
-            "}</script>",
-        ]);
-
+        // $vueData['template'] .= implode(PHP_EOL, [
+        //     "<script>export default {",
+        //     "props : {$stringProps},",
+        //     ($exportData ? "data: () => { return {$stringData} }" : ''),
+        //     "}</script>",
+        // ]);
 
         $this->components[] = $vueData;
     }
 
-    public function getComponents()
-    {
+    public function getComponents() {
         return $this->components;
     }
 
 
-    public function head(): BridgeSeo
-    {
+    public function head(): BridgeSeo {
         return $this->head ??= new BridgeSeo(config('seo'));
     }
 }

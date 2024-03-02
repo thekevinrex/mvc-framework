@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use PhpVueBridge\Bedrock\Providers\RouteServiceProvider as RouteCoreServiceProvider;
-use PhpVueBridge\Support\facades\Route;
+use PhpVueBridge\Support\Facades\Route;
 
 class RouteServiceProvider extends RouteCoreServiceProvider
 {

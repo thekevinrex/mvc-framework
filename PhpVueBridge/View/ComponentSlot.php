@@ -1,10 +1,9 @@
 <?php
 
 
-namespace app\core\view;
+namespace PhpVueBridge\View;
 
-use app\core\interfaces\Htmleable;
-
+use PhpVueBridge\Bedrock\Interfaces\Htmleable;
 
 class ComponentSlot implements Htmleable
 {
@@ -15,15 +14,15 @@ class ComponentSlot implements Htmleable
 
     protected $content;
 
-    public function __construct($name, $attributes)
+    public function __construct($attributes)
     {
-        $this->name = $name;
         $this->attributes = new ComponentAttributeBag($attributes);
     }
 
     public function setContent($content)
     {
         $this->content = $content;
+
         return $this;
     }
 

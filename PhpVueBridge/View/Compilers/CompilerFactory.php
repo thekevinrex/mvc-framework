@@ -1,66 +1,38 @@
 <?php
 
-namespace app\core\view\Compilers;
+namespace PhpVueBridge\View\Compilers;
 
-use app\Core\Application;
-use app\core\view\Compilers\ComponentCompiler;
+use PhpVueBridge\Bedrock\Application;
+use PhpVueBridge\View\Compilers\Exceptions\CompilerException;
 
 class CompilerFactory
 {
 
-    protected Application $app;
-
-    /**
-     * The path to the aplication views directory
-     */
-    protected string $path;
-
-    /**
-     * The path to the aplication components views directory
-     */
-    protected string $componentsPath;
-
-    /**
-     * The path to storage the components views directory
-     */
-    protected string $compiledPath;
-
-    /**
-     * If the application should compile every time that the application returns the view 
-     * if should cache the compiled views
-     */
-    protected bool $cacheCompiled = false;
-
-    /**
-     * The extension of the compiled views
-     */
-    protected string $compiledExtension = 'php';
-
-
-    protected array $extensions = [
-        '.vue.phtml',
-        '.phtml'
-    ];
+    protected array $extensions = [];
 
     protected array $directives = [];
 
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
+    protected array $compilers = [];
+
+    protected array $resolvedCompilers = [];
+
+    protected array $precompilers = [];
+
+    public function __construct(
+        protected string $basePath,
+        protected string $compiledPath,
+        protected string $compiledExtension,
+        protected bool $cacheCompiled = false
+    ) {
     }
 
-    public function compile(string $path, array $data = [], $isComponent = false)
+    public function compile(string $path, array $data = [])
     {
+        $compiler = $this->resolveCompiler(
+            $compilerName = $this->getCompilerFromPath($path)
+        );
 
-        if ($isComponent && str_ends_with($this->viewPath($path), '.vue.phtml')) {
-            return (new VueCompiler($this))->make($path, $data);
-        }
-
-        if ($isComponent) {
-            return (new ComponentCompiler($this))->make($path, $data);
-        }
-
-        return (new ViewCompiler($this))->make($path, $data);
+        return $compiler->make($path);
     }
 
     /**
@@ -79,7 +51,7 @@ class CompilerFactory
      */
     protected function getCompiledName(string $file)
     {
-        return sha1('compiled ' . $file);
+        return sha1('compiled_view_' . str_replace($this->basePath, '', $file));
     }
 
     /**
@@ -90,9 +62,10 @@ class CompilerFactory
         if (!$this->cacheCompiled)
             return true;
 
+
         $path = $this->getCompiledPath($file);
 
-        if (!file_exists($path) || filemtime($path) < filemtime($this->viewPath($file))) {
+        if (!file_exists($path) || filemtime($path) < filemtime($file)) {
             return true;
         }
 
@@ -102,49 +75,36 @@ class CompilerFactory
     /**
      * Get the view path for a given view
      */
-    public function viewPath($name)
+    public function getCompilerFromPath(string $path)
     {
-        $path = $this->path . $name;
-
-        if (file_exists($path . end($this->extensions))) {
-            return $path . end($this->extensions);
-        }
-
-        foreach ($this->extensions as $extension) {
-            if (file_exists($path . $extension)) {
-                return $path . $extension;
+        foreach ($this->extensions as $extension => $compiler) {
+            if (str_ends_with($path, '.' . $extension)) {
+                return $compiler;
             }
         }
 
-        throw new \InvalidArgumentException('the view in not found: ' . $path);
+        throw new CompilerException('the given path does not have  in not found: ' . $path);
     }
 
-    /**
-     * Set the view path
-     */
-    public function setViewPath(string $path)
-    {
-        if (!file_exists($path)) {
-            mkdir($path, 0744);
-        }
-
-        $this->path = $path;
-
-        return $this;
+    public function registerCompiler(
+        string $extension,
+        string $compilerName,
+        \Closure $resolver
+    ) {
+        $this->extensions[$extension] = $compilerName;
+        $this->compilers[$compilerName] = $resolver;
     }
 
-    /**
-     * Set the component path
-     */
-    public function setComponentPath(string $componentPath)
-    {
-        if (!file_exists($componentPath)) {
-            mkdir($componentPath, 0744);
+    public function resolveCompiler(
+        string $compilerName
+    ) {
+        if (!isset($this->compilers[$compilerName])) {
+            throw new CompilerException('the given path extension does not have a compiler registered: ' . $compilerName);
         }
 
-        $this->componentsPath = $componentPath;
+        $compiler = $this->compilers[$compilerName]($this);
 
-        return $this;
+        return $this->resolvedCompilers[$compilerName] = $compiler;
     }
 
     /**
@@ -192,5 +152,8 @@ class CompilerFactory
         return $this->directives;
     }
 
+    public function getPrecompilers(): array
+    {
+        return $this->precompilers;
+    }
 }
-?>

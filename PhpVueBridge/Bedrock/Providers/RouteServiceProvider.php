@@ -8,8 +8,6 @@ use PhpVueBridge\Routes\Router;
 
 class RouteServiceProvider extends ServiceProvider
 {
-
-
     protected Router $router;
 
     public function __construct(Application $app)
@@ -19,7 +17,7 @@ class RouteServiceProvider extends ServiceProvider
         parent::__construct($app);
     }
 
-    public function register()
+    public function register(): void
     {
 
     }
@@ -27,7 +25,7 @@ class RouteServiceProvider extends ServiceProvider
     public function routes($callback)
     {
         $this->app->bindMethod('compileRoutes', function () use ($callback) {
-            return $callback($this->router);
+            return $callback();
         });
     }
 

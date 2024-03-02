@@ -473,13 +473,13 @@ class Application extends Container implements ApplicationContract
     {
 
         $enviroment = match (self::$enviroment) {
-            'development' => 'dev',
-            'production' => 'prod',
+            'development' => '.dev',
+            'production' => '.prod',
             'console' => '',
-            default => self::$enviroment
+            default => '.' . self::$enviroment
         };
 
-        $file = '.env.' . $enviroment;
+        $file = '.env' . $enviroment;
 
         if (!file_exists($this->getEnviromentPath() . '/' . $file)) {
             $file = '.env';
@@ -590,8 +590,7 @@ class Application extends Container implements ApplicationContract
                 \PhpVueBridge\Contracts\ViewContract::class
             ],
             'compiler' => [
-                \PhpVueBridge\View\Compilers\Compiler::class,
-                \PhpVueBridge\View\Compilers\ViewCompiler::class
+                \PhpVueBridge\View\Compilers\CompilerFactory::class
             ],
             'engine' => [
                 \PhpVueBridge\View\Engines\CompilerEngine::class,
@@ -602,8 +601,8 @@ class Application extends Container implements ApplicationContract
                 \PhpVueBridge\DataBase\DataBaseManager::class
             ],
             'bridge' => [
-                \PhpVueBridge\bridge\Bridge::class,
-                \PhpVueBridge\contracts\BridgeContract::class
+                \PhpVueBridge\Bridge\Bridge::class,
+                \PhpVueBridge\Bridge\Contracts\BridgeContract::class
             ]
         ];
 
@@ -662,7 +661,4 @@ class Application extends Container implements ApplicationContract
 
         $this->fireCallbacks($this->terminatedCallback);
     }
-
 }
-
-?>

@@ -1,19 +1,16 @@
 <?php
 
 
-namespace app\core\bridge\Http;
+namespace PhpVueBridge\Bridge\Http;
 
+use PhpVueBridge\Bridge\Bridge;
+use PhpVueBridge\Bedrock\Application;
+use PhpVueBridge\Http\Response\Response;
+use PhpVueBridge\Support\Facades\BridgeSeo;
+use PhpVueBridge\Http\Response\JsonResponse;
+use PhpVueBridge\Routes\Interfaces\MiddlewareInterface;
 
-use app\Core\Application;
-use app\core\bridge\Bridge;
-use app\core\facades\BridgeSeo;
-use app\core\interfaces\middlewareInterface;
-use app\Core\Request\Request;
-use app\Core\Response\JsonResponse;
-use app\Core\Response\Response;
-
-class BridgeMiddleware implements middlewareInterface
-{
+class BridgeMiddleware implements MiddlewareInterface {
 
     public function __construct(
         protected Application $app,
@@ -22,16 +19,15 @@ class BridgeMiddleware implements middlewareInterface
 
     }
 
-    public function handle($request, \Closure $next)
-    {
+    public function handle($request, \Closure $next) {
 
         $response = $next($request);
 
-        if (!$response instanceof Response) {
+        if(!$response instanceof Response) {
             return $response;
         }
 
-        if ($this->isBridgeRequest()) {
+        if($this->isBridgeRequest()) {
             return $this->handleBridgeResponse($response);
         } else {
             return $this->handleRegularResponse($response);
@@ -39,8 +35,7 @@ class BridgeMiddleware implements middlewareInterface
 
     }
 
-    protected function resolveBridgeData()
-    {
+    protected function resolveBridgeData() {
         return [
             'head' => BridgeSeo::toArray(),
             'flash' => [],
@@ -51,19 +46,17 @@ class BridgeMiddleware implements middlewareInterface
         ];
     }
 
-    protected function isBridgeRequest(): bool
-    {
+    protected function isBridgeRequest(): bool {
         $request = app('request');
 
-        if ($request->headers->has(Bridge::BRIDGE_HEADER)) {
+        if($request->headers->has(Bridge::BRIDGE_HEADER)) {
             return true;
         }
 
         return false;
     }
 
-    protected function handleRegularResponse(Response $response)
-    {
+    protected function handleRegularResponse(Response $response) {
 
         $bridgeData = $this->resolveBridgeData();
 
@@ -80,8 +73,7 @@ class BridgeMiddleware implements middlewareInterface
     }
 
 
-    protected function handleBridgeResponse(Response $response)
-    {
+    protected function handleBridgeResponse(Response $response) {
         $bridgeData = $this->resolveBridgeData();
 
         return (new JsonResponse([

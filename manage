@@ -24,6 +24,7 @@ $app = require_once __DIR__ . '/bootstrap/app_start.php';
  * This resolve the http contract of the container and handle the incoming request
  * Giving a proper response to the user
  */
+
 $command = $app->resolve(PhpVueBridge\Console\Contracts\ConsoleContract::class)->excecuteCommand(
     new \PhpVueBridge\Console\Input(
         new \PhpVueBridge\Http\Request\Request()

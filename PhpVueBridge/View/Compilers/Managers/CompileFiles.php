@@ -1,15 +1,15 @@
 <?php
 
-namespace app\core\view\Compilers\Managers;
+namespace PhpVueBridge\View\Compilers\Managers;
 
-use app\Core\Support\Util;
+use PhpVueBridge\Support\Util;
+use PhpVueBridge\Support\Facades\Bridge;
 
 trait compileFiles
 {
-
     protected function compileFiles($content)
     {
-        return preg_replace_callback('/@?(include|extend)\s*\((.*)\)/i', function ($matches) {
+        return preg_replace_callback('/@?(include|extends)\s*\((.*)\)/i', function ($matches) {
 
             $type = $matches[1];
             $arguments = explode(',', trim($matches[2]), 2);
@@ -19,12 +19,11 @@ trait compileFiles
                 $arguments[1] ?? '[]'
             ];
 
-            if ($type == 'extend') {
-                $this->footer[] = "<?php echo \$_engine->render('{$name}') ?>";
+            if ($type == 'extends') {
+                $this->footer[] = "<?php echo \$_factory->make('{$name}')->render() ?>";
             } else {
-                return "<?php echo \$_engine->render('{$name}',{$data}) ?>";
+                return "<?php echo \$_factory->make('{$name}',{$data})->render() ?>";
             }
-
         }, $content);
     }
 
@@ -34,32 +33,30 @@ trait compileFiles
 
             $name = Util::StripString($matches[1]);
 
-            return "<?php \$_engine->startSection ('{$name}') ?>";
+            return "<?php \$_factory->startSection ('{$name}') ?>";
         }, $content);
 
-        return preg_replace('/@endsection/is', '<?php \$_engine->endSection (); ?>', $content);
+        return preg_replace('/@endsection/is', '<?php \$_factory->endSection (); ?>', $content);
     }
 
-    public function yield ($matches)
+    public function yield(array $directive)
     {
-        $yield = Util::StripString($matches[2]);
-        return "<?php echo \$_engine->yieldContent ('{$yield}') ?>";
+        $yield = Util::StripString($directive[2]);
+
+        return "<?php echo \$_factory->yieldContent ('{$yield}') ?>";
     }
 
 
-    public function assets($matches)
+    public function assets($directive)
     {
-        $inputs = $matches[2];
+        $inputs = $directive[2];
 
-        if (str_starts_with($matches[2], '[') && str_ends_with($matches[2], ']')) {
-            $inputs = substr($matches[2], 1, -1);
+        if (str_starts_with($directive[2], '[') && str_ends_with($directive[2], ']')) {
+            $inputs = substr($directive[2], 1, -1);
         }
 
         $inputs = explode(',', $inputs);
 
-        return \app\core\facades\Bridge::loadAssets($inputs);
+        return Bridge::loadAssets($inputs);
     }
-
-
 }
-?>

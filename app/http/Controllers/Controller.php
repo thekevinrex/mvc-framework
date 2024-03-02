@@ -1,7 +1,7 @@
 <?php
 
 
-namespace app\app\http\Controllers;
+namespace App\Http\Controllers;
 
 
 class Controller

@@ -1,11 +1,11 @@
 <?php
 
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
-use app\core\bridge\Components\BridgeComponentInterface;
-use app\core\view\ComponentHandler;
-use app\core\view\View;
+use PhpVueBridge\Bridge\Components\ComponentHandler;
+use PhpVueBridge\Bridge\Components\BridgeComponentInterface;
+use PhpVueBridge\View\Component;
 
 class BridgeHandler
 {
@@ -20,12 +20,11 @@ class BridgeHandler
 
     public function __construct()
     {
-
     }
 
-    public function handle(array $componentData)
+    public function handle(Component $component, array $parameters = [])
     {
-        $this->components[] = new ComponentHandler($componentData['component']);
+        $this->components[] = new ComponentHandler($component, $parameters);
 
         return $this;
     }
@@ -50,11 +49,11 @@ class BridgeHandler
             return '';
         }
 
-        [$content, $engine] = end($this->components)->render($parameters);
+        $content = end($this->components)->render($parameters);
 
-        $content = $this->compileBridgeTags($content);
+        // $content = $this->compileBridgeTags($content);
 
-        return [$content, $engine];
+        return $content;
     }
 
     protected function compileBridgeTags($view)
@@ -109,7 +108,7 @@ class BridgeHandler
             return false;
         }
 
-        $component = end($this->components);
+        $component = end($this->components)->getComponent();
 
         if (method_exists($component, $value)) {
             if ((new \ReflectionMethod($component, $value))->isPublic()) {
@@ -117,7 +116,7 @@ class BridgeHandler
             }
         }
 
-        if (in_array($value, array_keys($component->getComponent()->getProperties()))) {
+        if (in_array($value, array_keys($component->getProperties()))) {
             if (in_array($event, ['model'])) {
                 return $value;
             }
@@ -142,4 +141,3 @@ class BridgeHandler
         return $this->events;
     }
 }
-?>

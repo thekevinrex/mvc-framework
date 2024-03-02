@@ -1,8 +1,8 @@
 <?php
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
-use app\core\bridge\Utils\Meta;
+use PhpVueBridge\Bridge\Utils\Meta;
 
 class BridgeSeo
 {

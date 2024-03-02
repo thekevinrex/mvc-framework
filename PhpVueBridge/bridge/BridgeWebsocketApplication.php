@@ -1,9 +1,7 @@
 <?php
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
-use app\Core\Websockets\Applications\WsApplication;
-use app\Core\Websockets\Connection;
 
 class BridgeWebsocketApplication extends WsApplication
 {

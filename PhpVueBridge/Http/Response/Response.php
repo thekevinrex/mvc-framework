@@ -3,6 +3,7 @@
 namespace PhpVueBridge\Http\Response;
 
 use PhpVueBridge\Bedrock\Interfaces\Renderable;
+use PhpVueBridge\Http\Request\ParameterBag;
 use PhpVueBridge\Http\Request\Request;
 
 class Response
@@ -192,7 +193,7 @@ class Response
         // RFC6585
     ];
 
-    public $headers = [];
+    public ParameterBag $headers;
 
     /**
      * @var string
@@ -221,10 +222,7 @@ class Response
     public function __construct($content, int $statusCode = 200, array $headers = [])
     {
 
-        $this->headers = array_merge(
-            $this->headers,
-            $headers,
-        );
+        $this->headers = new ParameterBag($headers);
 
         $this->setBasicHeaders();
         $this->setStatusCode($statusCode);
@@ -233,11 +231,12 @@ class Response
 
     public function setBasicHeaders()
     {
-        if (!isset($this->headers['Cache-Control']))
-            $this->headers['Cache-Control'] = '';
+        if (!$this->headers->has('Cache-Control')) {
+            $this->headers->set('Cache-Control', '');
+        }
 
-        if (!isset($this->headers['Date'])) {
-            $this->headers['Date'] = gmdate('D, d M Y H:i:s') . ' GMT';
+        if (!$this->headers->has('Date')) {
+            $this->headers->set('Date', gmdate('D, d M Y H:i:s') . ' GMT');
         }
     }
 
@@ -280,23 +279,25 @@ class Response
             ini_set('default_mimetype', '');
         } else {
 
-            if (!isset($this->headers['Content-Type'])) {
+            if (!$this->headers->has('Content-Type')) {
                 $format = $request->getFormat();
 
                 if ($mime = $request->getMimeType($format ?? 'html')) {
-                    $this->headers['Content-Type'] = $mime;
+                    $this->headers->set('Content-Type', $mime);
                 } else {
-                    $this->headers['Content-Type'] = 'text/html';
+                    $this->headers->set('Content-Type', 'text/html');
                 }
             }
 
             if (
-                str_starts_with($this->headers['Content-Type'], 'text/')
-                && !str_contains($this->headers['Content-Type'], 'charset')
+                str_starts_with($this->headers->get('Content-Type'), 'text/')
+                && !str_contains($this->headers->get('Content-Type'), 'charset')
             ) {
-                $this->headers['Content-Type'] = $this->headers['Content-Type'] . '; charset=' . ($this->charset ?: 'UTF-8');
+                $this->headers->set(
+                    'Content-Type',
+                    $this->headers->get('Content-Type') . '; charset=' . ($this->charset ?: 'UTF-8')
+                );
             }
-
 
         }
 
@@ -343,16 +344,18 @@ class Response
     public function __toString(): string
     {
         return
-            $this->headers . "\r\n" .
+            implode(PHP_EOL, $this->headers->toArray()) . "\r\n" .
             $this->content;
     }
 
-    private function removeHeader($key)
+    protected function removeHeader($key)
     {
-        if (!isset($this->headers[$key]))
-            return false;
+        $this->headers->remove($key);
+    }
 
-        unset($this->headers[$key]);
+    public function setHeader($key, $value = '')
+    {
+        $this->headers->set($key, $value);
     }
 }
 ?>

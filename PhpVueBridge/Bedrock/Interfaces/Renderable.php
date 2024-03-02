@@ -7,5 +7,5 @@ namespace PhpVueBridge\Bedrock\Interfaces;
 interface Renderable
 {
 
-    public function render(array $data = []);
+    public function render();
 }

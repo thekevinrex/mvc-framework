@@ -3,10 +3,11 @@
 namespace PhpVueBridge\Routes;
 
 use PhpVueBridge\Bedrock\Application;
-use PhpVueBridge\Routes\Contracts\RouterContract;
-use PhpVueBridge\Middlewares\CheckLine;
 use PhpVueBridge\Http\Request\Request;
 use PhpVueBridge\Http\Response\Response;
+use PhpVueBridge\Routes\Middlewares\CheckLine;
+use PhpVueBridge\Routes\Contracts\RouterContract;
+use PhpVueBridge\Routes\Exceptions\RouteNotFoundException;
 
 class Router implements RouterContract
 {
@@ -164,7 +165,6 @@ class Router implements RouterContract
 
     public function resolve(Request $request)
     {
-
         $this->request = $request;
 
         return $this->runRoute($request, $this->findRoute($request));
@@ -180,7 +180,7 @@ class Router implements RouterContract
         $route = $this->routes[strtolower($request->getMethod())][$request->getPath()] ?? false;
 
         if (!$route) {
-            throw new \Exception('http not found');
+            throw new RouteNotFoundException('http not found');
         }
 
         $this->app->instance(Route::class, $route);
@@ -203,13 +203,17 @@ class Router implements RouterContract
 
         return (new CheckLine($this->app))
             ->check($route)
-            ->throw($this->getRouteMiddleware($route))
-            ->then(function (Route $route) use ($request) {
-                return $this->prepareResponse(
-                    $request,
-                    $route->run(),
-                );
-            });
+            ->throw(
+                $this->getRouteMiddleware($route)
+            )
+            ->then(
+                function (Route $route) use ($request) {
+                    return $this->prepareResponse(
+                        $request,
+                        $route->run(),
+                    );
+                }
+            );
     }
 
     protected function getRouteMiddleware(Route $route)

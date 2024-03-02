@@ -1,8 +1,9 @@
 <?php
 
-namespace app\core\bridge\Components;
+namespace PhpVueBridge\Bridge\Components;
 
-use app\core\view\Component;
+use PhpVueBridge\View\Component;
+
 
 abstract class BridgeComponent extends Component implements BridgeComponentInterface
 {
@@ -34,7 +35,7 @@ abstract class BridgeComponent extends Component implements BridgeComponentInter
 
     public function isVueComponent(): bool
     {
-        return str_ends_with(app('compiler')->viewPath($this->view), '.vue.phtml');
+        // return str_ends_with(app('compiler')->viewPath($this->view), '.vue.phtml');
+        return false;
     }
 }
-?>

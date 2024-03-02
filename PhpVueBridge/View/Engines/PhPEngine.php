@@ -5,7 +5,12 @@ namespace PhpVueBridge\View\Engines;
 class PhPEngine extends Engine
 {
 
-    public function get(string $file, array $data)
+    public function get(string $file, array $data = []): string
+    {
+        return $this->getFileContent($file, $data);
+    }
+
+    protected function getFileContent($file, array $data)
     {
 
         extract($data, EXTR_SKIP);
@@ -28,4 +33,3 @@ class PhPEngine extends Engine
         return ltrim(ob_get_clean());
     }
 }
-?>

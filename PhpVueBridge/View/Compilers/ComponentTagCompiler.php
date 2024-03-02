@@ -1,64 +1,97 @@
 <?php
 
 
-namespace app\core\view\Compilers;
+namespace PhpVueBridge\View\Compilers;
 
-use app\core\view\AnonymosComponent;
+use PhpVueBridge\View\ComponentFinder;
+use PhpVueBridge\View\AnonymosComponent;
+use PhpVueBridge\View\Compilers\Parser\Nodes\ModuleNode;
+use PhpVueBridge\View\Compilers\Parser\Nodes\TemplateNode;
+use PhpVueBridge\View\Compilers\Parser\Nodes\UnCompiledNode;
+use PhpVueBridge\View\Compilers\Parser\Token;
+use PhpVueBridge\View\Compilers\Parser\Tokens\DirectiveToken;
+use PhpVueBridge\View\Compilers\Parser\TreeNavegator;
 
 class ComponentTagCompiler
 {
 
-    protected string $namespace;
-
-    protected array $building = [];
-
-    public function __construct($namespace)
-    {
-        $this->namespace = $namespace;
+    public function __construct(
+        protected TreeNavegator $navegator
+    ) {
     }
 
-    public function compile(string $content)
+    public function compile()
     {
 
-        $content = $this->compileSlots($content);
-        $content = $this->compileComponentSelClosingTag($content);
-        $content = $this->compileComponentCloseTag($content);
-        $content = $this->compileComponentTag($content);
+        $this->navegator
+            ->filterByTokens([Token::AUTO_CLOSE_CUSTOM_TAG_TOKEN, Token::OPEN_CUSTOM_TAG_TOKEN])
+            ->start(function (TemplateNode $node, $navegator) {
 
-        return $content;
+                // The auto close custom tag and the open custom tag
+                // are placed inside a template node, so we need to access the template node 
+                // To get the component node
+                $componentNode = $node->getNode();
+
+                // Get the component token 
+                // This has the information of tagName, attributes
+                $token = $componentNode->getToken();
+
+                $tagName = $token->getTagName();
+                $attributes = $token->getAttributes();
+
+                $nodes = array_merge(
+                    $this->handleComponent($tagName, $attributes),
+                    $componentNode->getChilds()
+                );
+
+                if ($node->getTokenType() == Token::AUTO_CLOSE_CUSTOM_TAG_TOKEN) {
+                    array_push($this->closeDirective());
+                }
+
+                $newNode = new ModuleNode(
+                    $token
+                );
+
+                $node->setNode($newNode);
+            });
+
+        // $content = $this->compileSlots($content);
+        // $content = $this->compileComponentSelClosingTag($content);
+        // $content = $this->compileComponentCloseTag($content);
+        // $content = $this->compileComponentTag($content);
+
+        // return $content;
     }
 
-    protected function handleComponent($component, $attributes = []): string
+    protected function handleComponent($component, $attributes = []): array
     {
-        $class = $this->getComponentResolver($component);
+        $class = ComponentFinder::getComponentResolver($component);
 
-        if (!class_exists($class)) {
-            $class = AnonymosComponent::class;
-        }
-
-        return $this->compileStartTag(
-            $component,
-            $class,
-            $attributes
-        );
+        return [
+            new TemplateNode(
+                new UnCompiledNode(
+                    new DirectiveToken(Token::DIRECTIVE_TOKEN, $this->compileDirective($component, $class, $attributes)),
+                    $this->navegator->getCurrent()->getParent()
+                )
+            )
+        ];
     }
 
-    protected function compileStartTag($name, $class, $attributes)
+    protected function compileDirective($name, $class, $attributes)
     {
-
-        $hash = sha1('component' . $name);
-
-        return implode("\n", [
-            "<?php \$component = \$_engine->component('{$name}', '{$class}'," . '"' . $this->attributesToString($attributes) . '"' . "); ?>",
-            "<?php if (isset(\$component)){ \$component_{$hash} = \$component; } ?>",
-            "<?php if(isset(\$component_{$hash}) && \$component_{$hash}->shouldRender()): ?>",
-            "<?php \$_engine->startComponent('{$name}'); ?>",
-        ]);
+        return "@component({$name},{$class},{$this->attributesToString($attributes)})";
     }
 
-    protected function closeTag()
+    protected function closeDirective()
     {
-        return PHP_EOL . "<?php echo \$_engine->renderComponent(); endif; ?>";
+        return [
+            new TemplateNode(
+                new UnCompiledNode(
+                    new DirectiveToken(Token::DIRECTIVE_TOKEN, "@endComponent"),
+                    $this->navegator->getCurrent()->getParent()
+                )
+            )
+        ];
     }
 
     protected function attributesToString($attributes)
@@ -69,200 +102,6 @@ class ComponentTagCompiler
         }
 
         return implode(',', $attributesString);
-    }
-
-    protected function getComponentResolver($component)
-    {
-        $class = $this->formatClassName($component);
-
-        if (class_exists($this->namespace . $class . 'Component')) {
-            return $this->namespace . $class . 'Component';
-        }
-
-        if (str_starts_with($component, $this->namespace)) {
-            if (class_exists($component)) {
-                return $component;
-            }
-        }
-
-        return str_replace('\\', '.', $class);
-    }
-
-    protected function formatClassName($component)
-    {
-        $paths = array_map(function ($path) {
-            if (count($names = explode('-', $path)) > 1) {
-                return array_reduce($names, function ($cary, $name) {
-                    return $cary . ucfirst($name);
-                }, '');
-            } else {
-                return ucfirst($path);
-            }
-        }, explode('.', $component));
-
-        return implode('\\', $paths);
-    }
-
-
-    protected function parseShortAttributeSyntax(string $value)
-    {
-        return preg_replace_callback("/\s\:\\\$(\w+)/x", function (array $matches) {
-            return " :{$matches[1]}=\"\${$matches[1]}\"";
-        }, $value);
-    }
-
-    protected function getAttributesFromString($string)
-    {
-        $string = $this->parseShortAttributeSyntax($string);
-
-        if (
-            !preg_match_all('/
-            (?<attribute>[\w\-:.@]+)
-            (
-                =
-                (?<value>
-                    (
-                        \"[^\"]+\"
-                        |
-                        \\\'[^\\\']+\\\'
-                        |
-                        [^\s>]+
-                    )
-                )
-            )?
-        /x', $string, $matches, PREG_SET_ORDER)
-        ) {
-            return [];
-        }
-        $attributes = [];
-
-        foreach ($matches as $match) {
-
-            if (!isset($match['value']) || !isset($match['attribute'])) {
-                continue;
-            }
-
-            $attributeName =
-                (str_starts_with($match["attribute"], '::'))
-                ? substr($match["attribute"], 1)
-                : $match["attribute"];
-
-            $value = substr($match["value"], 1, -1);
-
-            if (!str_starts_with($attributeName, ':')) {
-                if (preg_match('/(@)?{{\s*(.+?)\s*}}(\r?\n)?/s', $value) && !str_starts_with($value, '@')) {
-                    $value = preg_replace('/(@)?{{\s*(.+?)\s*}}(\r?\n)?/s', '$2', $value);
-                    $attributeName = ':' . $attributeName;
-                }
-            }
-
-            $attributes[$attributeName] = $value;
-        }
-
-        return $attributes;
-    }
-
-    protected function compileComponentTag($content)
-    {
-        return preg_replace_callback("/
-        <
-            \s*
-            component[-\:]([\w\-\:\.]*)
-            (?<attributes>
-                (?:
-                    \s+
-                    (?:
-                        (?:
-                            @(?:class)(\( (?: (?>[^()]+) | (?-1) )* \))
-                        )
-                        |
-                        (?:
-                            \{\{\s*\\\$attributes(?:[^}]+?)?\s*\}\}
-                        )
-                        |
-                        (?:
-                            (\:\\\$)(\w+)
-                        )
-                        |
-                        (?:
-                            [\w\-:.@]+
-                            (
-                                =
-                                (?:
-                                    \\\"[^\\\"]*\\\"
-                                    |
-                                    \'[^\']*\'
-                                    |
-                                    [^\'\\\"=<>]+
-                                )
-                            )?
-                        )
-                    )
-                )*
-                \s*
-            )
-            (?<![\/=\-])
-        >
-    /x", function ($matches) {
-            return $this->handleComponent(
-                $matches[1],
-                $this->getAttributesFromString($matches['attributes'])
-            );
-        }, $content);
-    }
-
-    protected function compileComponentSelClosingTag($content)
-    {
-        return preg_replace_callback("/
-        <
-            \s*
-            component[-\:]([\w\-\:\.]*)
-            \s*
-            (?<attributes>
-                (?:
-                    \s+
-                    (?:
-                        (?:
-                            @(?:class)(\( (?: (?>[^()]+) | (?-1) )* \))
-                        )
-                        |
-                        (?:
-                            \{\{\s*\\\$attributes(?:[^}]+?)?\s*\}\}
-                        )
-                        |
-                        (?:
-                            (\:\\\$)(\w+)
-                        )
-                        |
-                        (?:
-                            [\w\-:.@]+
-                            (
-                                =
-                                (?:
-                                    \\\"[^\\\"]*\\\"
-                                    |
-                                    \'[^\']*\'
-                                    |
-                                    [^\'\\\"=<>]+
-                                )
-                            )?
-                        )
-                    )
-                )*
-                \s*
-            )
-        \/>
-    /x", function ($matches) {
-            return $this->handleComponent(
-                $matches[2],
-                $this->getAttributesFromString($matches[3])
-            ) . PHP_EOL . $this->closeTag();
-        }, $content);
-    }
-
-    protected function compileComponentCloseTag($content)
-    {
-        return preg_replace("/<\/\s*component[-\:][\w\-\:\.]*\s*>/", $this->closeTag(), $content);
     }
 
     protected function compileSlots($content)
@@ -289,14 +128,11 @@ class ComponentTagCompiler
 
         $name = lcfirst($name);
 
-        return implode("\n", [
-            "<?php \${$name} = \$_engine->slot('{$name}'," . '"' . $this->attributesToString($attributes) . '"' . "); ?>",
-            "<?php \$_engine->startSlot('{$name}') ?>",
-        ]);
+        return "@slot('{$name}',{$this->attributesToString($attributes)})";
     }
 
     protected function closeSlot()
     {
-        return "\n" . "<?php \$_engine->endSlot() ?>";
+        return PHP_EOL . "@endSlot";
     }
 }

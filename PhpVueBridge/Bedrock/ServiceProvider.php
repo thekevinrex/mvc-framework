@@ -3,23 +3,19 @@
 namespace PhpVueBridge\Bedrock;
 
 use PhpVueBridge\Collection\Collection;
-
-use app\core\bridge\BridgeServiceProvider;
-use app\Core\DataBase\DataBaseServiceProvider;
-use app\core\view\ViewServiceProvider;
-use app\Core\Websockets\WebsocketsServiceProvider;
+use PhpVueBridge\View\ViewServiceProvider;
+use PhpVueBridge\Bridge\BridgeServiceProvider;
 
 abstract class ServiceProvider
 {
 
-
-    protected $app;
+    protected Application $app;
 
     protected static array $services = [
         ViewServiceProvider::class,
         BridgeServiceProvider::class,
-        DataBaseServiceProvider::class,
-        WebsocketsServiceProvider::class,
+        // DataBaseServiceProvider::class,
+        // WebsocketsServiceProvider::class,
     ];
 
     public array $bindings = [];

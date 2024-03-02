@@ -1,8 +1,8 @@
 <?php
 
+use PhpVueBridge\Support\Facades\Route;
 
-use app\core\facades\Route;
 
-Route::get('/', [\app\App\Http\Controllers\HomeController::class, 'index'])->middleware('asdas:asas');
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index']);
 
-Route::get('/home', [\app\App\Http\Controllers\HomeController::class, 'home'])->name('home');
+Route::get('/home', [\App\Http\Controllers\HomeController::class, 'home'])->name('home');

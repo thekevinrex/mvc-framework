@@ -1,55 +1,38 @@
 <?php
 
 
-namespace app\core\view\Compilers;
+namespace PhpVueBridge\View\Compilers;
 
-use app\core\view\Compilers\Managers\compileComponent;
-use app\core\view\Compilers\Managers\compileRaws;
+use PhpVueBridge\Support\Util;
+use PhpVueBridge\View\Compilers\Managers\compileComponent;
+use PhpVueBridge\View\Compilers\Managers\compileRaws;
 
 class VueCompiler extends Compiler
 {
     use compileComponent,
         compileRaws;
 
-    protected array $compileMethods = [
-        'RawPhp',
-        'Script',
-    ];
-
-    public function compile(string $content): string
-    {
-
-
-        return $content;
-    }
+    protected array $compileMethods = [];
 
     public function vueProps($matches)
     {
         return "<?php echo \$_engine->setVueProps ({$matches[2]}) ?>";
     }
 
+    public function data($matches)
+    {
+
+        $expresion = Util::StripString($matches[2]);
+
+        if (!str_contains($expresion, '$')) {
+            $expresion = "$" . $expresion;
+        }
+
+        return "<?php echo e({$expresion}) ?>";
+    }
+
     public function ref($matches)
     {
         return "<?php echo \$_engine->defineRef({$matches[2]}) ?>";
-    }
-
-    public function computed($matches)
-    {
-        return "<?php echo \$_engine->computed({$matches[2]}) ?>";
-    }
-
-    public function endComputed()
-    {
-        return "<?php echo \$_engine->endComputed() ?>";
-    }
-
-    public function method($matches)
-    {
-        return "<?php echo \$_engine->method({$matches[2]}) ?>";
-    }
-
-    public function endMethod()
-    {
-        return "<?php echo \$_engine->endMethod () ?>";
     }
 }

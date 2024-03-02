@@ -1,15 +1,15 @@
 <?php
 
 
-namespace app\core\bridge;
+namespace PhpVueBridge\Bridge;
 
+use PhpVueBridge\Bedrock\ServiceProvider;
 
-use app\Core\Support\ServiceProvider;
 
 class BridgeServiceProvider extends ServiceProvider
 {
 
-    public function register()
+    public function register(): void
     {
         $this->app->bindShared('bridge', function ($app) {
             return new Bridge($app);
@@ -22,15 +22,15 @@ class BridgeServiceProvider extends ServiceProvider
         $this->app->resolve('compiler')->directive('bridge', [$this, 'resolveBridgeContent']);
     }
 
-    public function resolveBridgeContent($matches)
+    public function resolveBridgeContent(array $directive)
     {
-        $app = trim($matches[2]) ?: 'app';
+        $app = trim($directive[2]) ?: 'app';
 
         $bridgeData = [
-            'html' => 'htmlentities(json_encode($bridgeContent), ENT_QUOTES, \'UTF-8\')',
-            'components' => 'htmlentities(json_encode($components), ENT_QUOTES, \'UTF-8\')',
-            'events' => 'htmlentities(json_encode($events), ENT_QUOTES, \'UTF-8\')',
-            'options' => 'htmlentities(json_encode($options), ENT_QUOTES, \'UTF-8\')',
+            'html' => 'e(json_encode($bridgeContent), ENT_QUOTES, \'UTF-8\')',
+            'components' => 'e(json_encode($components), ENT_QUOTES, \'UTF-8\')',
+            'events' => 'e(json_encode($events), ENT_QUOTES, \'UTF-8\')',
+            'options' => 'e(json_encode($options), ENT_QUOTES, \'UTF-8\')',
         ];
 
         return implode(
@@ -52,5 +52,4 @@ class BridgeServiceProvider extends ServiceProvider
 
         return implode(' ', $data);
     }
-
 }

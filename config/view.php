@@ -2,9 +2,17 @@
 
 return [
 
-    'path' => 'resources/views',
+    'paths' => [
+        resource_path('views/'),
+    ],
 
-    'components' => 'resources/views/components',
+    'component_path' => 'resources/views/components',
+
+    'compiled_path' => realpath(
+        storage_path('views/')
+    ),
+
+    'compiled_extension' => 'php',
 
     'rootFile' => 'root',
 ];

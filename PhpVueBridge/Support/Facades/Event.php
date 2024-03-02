@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpVueBridge\Support\facades;
+namespace PhpVueBridge\Support\Facades;
 
 class Event extends Facade
 {

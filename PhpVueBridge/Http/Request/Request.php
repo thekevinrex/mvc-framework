@@ -13,6 +13,18 @@ use PhpVueBridge\Http\Request\ServerBag;
 class Request implements RequestContract
 {
 
+    const METHOD_OPTIONS = 'OPTIONS';
+
+    const METHOD_GET = 'GET';
+
+    const METHOD_POST = 'POST';
+
+    const METHOD_PUT = 'PUT';
+
+    const METHOD_DELETE = 'DELETE';
+
+    const METHOD_PATCH = 'PATCH';
+
     /**
      * The path used to get the route
      */

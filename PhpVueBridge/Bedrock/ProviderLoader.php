@@ -4,6 +4,7 @@
 namespace PhpVueBridge\Bedrock;
 
 use PhpVueBridge\Bedrock\Interfaces\DeferredProvider;
+use PhpVueBridge\Collection\Interfaces\CollectionInterface;
 
 class ProviderLoader
 {
@@ -24,8 +25,11 @@ class ProviderLoader
         return $this;
     }
 
-    public function load(array $providers)
+    public function load(array|CollectionInterface $providers)
     {
+        if ($providers instanceof CollectionInterface) {
+            $providers = $providers->toArray();
+        }
 
         $cacheProviders = $this->loadCacheProviders();
 
@@ -58,9 +62,9 @@ class ProviderLoader
             $instance = $this->app->resolveProvider($provider);
 
             if ($instance instanceof DeferredProvider) {
-
-                foreach ($instance->provides() as $service)
+                foreach ($instance->provides() as $service) {
                     $cached['deferred'][$service] = $provider;
+                }
             } else {
                 $cached['load'][] = $provider;
             }

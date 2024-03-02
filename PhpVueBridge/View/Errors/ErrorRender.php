@@ -29,7 +29,7 @@ class ErrorRender extends PhPEngine
             'debugMode' => [
                 'file' => $this->e->getFile(),
                 'line' => $this->e->getLine(),
-                'trace' => $this->e->getTrace(),
+                // 'trace' => $this->e->getTrace(),
             ]
         ];
     }
@@ -62,4 +62,3 @@ class ErrorRender extends PhPEngine
         return $this->get(__DIR__ . '/views/error.phtml', $this->getDebugData());
     }
 }
-?>

@@ -2,12 +2,15 @@
 
 namespace PhpVueBridge\Support;
 
+use PhpOption\Option;
 use Dotenv\Repository\RepositoryBuilder;
 use Dotenv\Repository\RepositoryInterface;
-use PhpOption\Option;
+use Dotenv\Repository\Adapter\PutenvAdapter;
 
 class Env
 {
+
+    public static $putenv = true;
 
     /**
      * The environment repository instance.
@@ -22,7 +25,11 @@ class Env
         if (static::$repository === null) {
             $builder = RepositoryBuilder::createWithDefaultAdapters();
 
-            return static::$repository = $builder->immutable()->make();
+            if (static::$putenv) {
+                $builder = $builder->addAdapter(PutenvAdapter::class);
+            }
+
+            return static::$repository = $builder->make();
         }
 
         return static::$repository;

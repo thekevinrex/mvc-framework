@@ -1,22 +1,25 @@
 <?php
 
 
-namespace app\App\View\Components;
+namespace App\View\Components;
 
-use app\core\bridge\Components\BridgeComponent;
+use PhpVueBridge\View\View;
+use PhpVueBridge\View\Component;
 
-
-
-class PruebaComponent extends BridgeComponent
+class PruebaComponent extends Component
 {
 
     public string $msg = 'hola probando public properties';
 
-    public $hola = 'sdasdasdas';
+    public $hola;
 
     public function click()
     {
         $hola = 'probando evento';
     }
+
+    public function render(): string|View
+    {
+        return 'components.prueba';
+    }
 }
-?>

@@ -1,17 +1,19 @@
 <?php
 
 use PhpVueBridge\Support\Env;
-use PhpVueBridge\Support\facades\App;
-use PhpVueBridge\Support\facades\Bridge;
-use PhpVueBridge\Support\facades\Config;
-use PhpVueBridge\Support\facades\View;
+use PhpVueBridge\Support\Facades\App;
+use PhpVueBridge\Support\Facades\View;
+use PhpVueBridge\Support\Facades\Bridge;
+use PhpVueBridge\Support\Facades\Config;
+use PhpVueBridge\Bedrock\Interfaces\Htmleable;
+use PhpVueBridge\Bedrock\Interfaces\Renderable;
 
 function config($key, $default = '')
 {
     return Config::get($key, $default);
 }
 
-function env($key, $default)
+function env($key, $default = '')
 {
     return Env::get($key, $default);
 }
@@ -61,4 +63,13 @@ function url($url = '', $params = array())
     return app('url')->to($url, $params);
 }
 
-?>
+
+function resource_path(string $path = '')
+{
+    return app('app')->getResourcesPath() . (empty($path) ? '' : '/' . $path);
+}
+
+function storage_path(string $path = '')
+{
+    return app('app')->getStoragePath() . (empty($path) ? '' : '/' . $path);
+}

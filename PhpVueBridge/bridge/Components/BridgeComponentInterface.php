@@ -1,6 +1,6 @@
 <?php
 
-namespace app\core\bridge\Components;
+namespace PhpVueBridge\Bridge\Components;
 
 interface BridgeComponentInterface
 {

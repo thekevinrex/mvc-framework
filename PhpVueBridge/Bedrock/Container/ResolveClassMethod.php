@@ -8,6 +8,10 @@ class ResolveClassMethod extends ParameterResolver
 
     public function call($class, $method, $param = [])
     {
+        if (is_array($method)) {
+            [$class, $method] = $method;
+        }
+
         $parameter = $this->resolveParameters($class, $method, $param);
 
         if (method_exists($class, 'callAction')) {

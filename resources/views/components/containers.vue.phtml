@@ -1,23 +1,32 @@
-@props([
-'num'
-])
-
+@props(['num'])
 @ref ('count', $num)
 
 <script setup>
 
-    import { computed } from 'vue';
+    import { computed, inject, ref, onMounted } from 'vue'
 
-    @bridgeData
-    @bridgeProps
+    onMounted(() => {
+        console.log('On mounted')
+    })
 
-    const Product = computed(() => msg);
+    const $bridge = inject('$bridge');
+
+    console.log($bridge.version);
+
+    const props = defineProps(['msg']);
+
+    console.log(props);
+
+    const Product = computed(() => num.value);
 
 
     const click = () => num.value++;
 
-    console.log('console from component containers');
+    const num = ref(
+        @data('num')
+    );
 
+    const count = computed(() => num.value + 1);
 
 </script>
 

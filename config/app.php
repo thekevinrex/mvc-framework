@@ -16,7 +16,7 @@ return [
 
     'providers' => ServiceProvider::getDefaultProviders()->merge([
         RouteServiceProvider::class,
-        WebsocketServiceProvider::class,
+        // WebsocketServiceProvider::class,
     ]),
 ];
 ?>

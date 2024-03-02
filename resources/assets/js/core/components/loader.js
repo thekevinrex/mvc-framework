@@ -40,8 +40,6 @@ const Loader = {
 		const name = componentData.name;
 
 		const component = Loader.compileString(name, componentData.template);
-
-		console.log(component);
 	},
 };
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace app\core\bridge\Utils;
+namespace PhpVueBridge\Bridge\Utils;
 
 class AssetLoader
 {

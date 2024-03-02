@@ -35,6 +35,22 @@ class ParameterBag implements \IteratorAggregate, \Countable
         return $this->parameters[$key];
     }
 
+    public function remove($key): bool
+    {
+        if (!$this->has($key)) {
+            return false;
+        }
+
+        unset($this->parameters[$key]);
+
+        return true;
+    }
+
+    public function toArray(): array
+    {
+        return $this->parameters;
+    }
+
     /**
      * Returns an iterator for parameters.
      */
