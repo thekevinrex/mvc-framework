@@ -13,11 +13,5 @@ Framework de php con el principal objetivo de crear un puente entre php y vue 3,
 
 ## Tecnologias usadas
 
-- Next JS
-- React
-- Html 5
-- TailwindCss
-- Clerk
-- Supabase
-- Postgre Sql
-- Prisma
+- PHP
+- Vue 3
