@@ -1,7 +1,23 @@
-# Vue 3 + Vite
+# MVC Framework - A PHP Vue 3 Bridge (En Desarrollo)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+![Mvc Framework](https://kevin-portafolio.netlify.app/projects/mvc_framework_2.png)
 
-## Recommended IDE Setup
+Framework de php con el principal objetivo de crear un puente entre php y vue 3, el cual permita a los desarrolladores tener toda la reactividad de vue 3 sin tener que salir de php
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## Features (En desarrollo)
+
+- Template engine
+- Router
+- Console
+- Database Migrations
+
+## Tecnologias usadas
+
+- Next JS
+- React
+- Html 5
+- TailwindCss
+- Clerk
+- Supabase
+- Postgre Sql
+- Prisma
